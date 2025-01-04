@@ -14,7 +14,7 @@ def update_table(title, data):
 
     sheet = client.open(title).sheet1
     
-    sheet.update([data])
+    sheet.append_row(data)
 
     return "Данные добавлены успешно!"
 
@@ -43,7 +43,3 @@ def create_table(title):
     spreadsheet_id = f'https://docs.google.com/spreadsheets/d/{spreadsheetId}'
     return spreadsheet_id
 
-
-
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)

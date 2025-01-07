@@ -1,7 +1,7 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import httplib2 
-import apiclient.discovery
+import apiclient.discovery # type: ignore
 from oauth2client.service_account import ServiceAccountCredentials	
 
 
@@ -15,8 +15,6 @@ def update_table(title, data):
     sheet = client.open(title).sheet1
     
     sheet.append_row(data)
-
-    return "Данные добавлены успешно!"
 
 
 def create_table(title):
@@ -40,6 +38,41 @@ def create_table(title):
         sendNotificationEmail=False
     ).execute()
 
-    spreadsheet_id = f'https://docs.google.com/spreadsheets/d/{spreadsheetId}'
+    spreadsheet_id = spreadsheetId
     return spreadsheet_id
 
+
+def find_last_row(title):
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+
+    client = gspread.authorize(creds)
+
+    sheet = client.open(title).sheet1
+
+    data = sheet.get_all_values()
+
+    last_filled_row_index = None
+
+    for row_index in range(len(data)-1, -1, -1):  # Идем с конца к началу
+        if any(data[row_index]):  # Проверяем, есть ли заполненные ячейки в строке
+            last_filled_row_index = row_index + 1  # +1, чтобы учесть нумерацию с 1
+            break
+
+    # Проверяем, найдена ли последняя заполненная строка
+    if last_filled_row_index is not None:
+        last_row_data = data[last_filled_row_index - 1]
+        return last_filled_row_index, last_row_data
+    else:
+        print("Заполненных строк не найдено.")
+
+
+def delete_data_sheet(title, last_filled_row_index):
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+
+    client = gspread.authorize(creds)
+
+    sheet = client.open(title).sheet1
+
+    sheet.batch_clear([f'A{last_filled_row_index}:C{last_filled_row_index}'])

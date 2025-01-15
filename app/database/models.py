@@ -21,6 +21,7 @@ class User(Base):
     tg_id = mapped_column(BigInteger)
     google_sheeps = relationship('GoogleSheets')
     data = relationship('Data')
+    categories = relationship('Category')
 
 
 class Data(Base):
@@ -40,6 +41,15 @@ class GoogleSheets(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name_table: Mapped[str] = mapped_column(String(25))
     id_google_sheets: Mapped[str] = mapped_column(String(50))
+    user_tg_id = mapped_column(BigInteger, ForeignKey('users.tg_id'))
+    users = relationship('User')
+
+
+class Category(Base):
+    __tablename__ = 'categories'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    category: Mapped[str] = mapped_column(String(50))
     user_tg_id = mapped_column(BigInteger, ForeignKey('users.tg_id'))
     users = relationship('User')
 

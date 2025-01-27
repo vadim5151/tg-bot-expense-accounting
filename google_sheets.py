@@ -6,23 +6,22 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
 
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+
+client =  gspread.authorize(creds)
+
+
+httpAuth = creds.authorize(httplib2.Http())
+
 
 async def update_table(title, data):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    client =  gspread.authorize(creds)
-
     sheet = client.open(title).sheet1
     
     sheet.append_row(data)
 
 
 async def create_worksheet(title):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
-
-    client = gspread.authorize(creds)
 
     sheet =  client.open(title)
     # Получение текущего месяца
@@ -35,11 +34,7 @@ async def create_worksheet(title):
         print(f"Ошибка при создании листа: {e}")
 
 
-async def create_table(title):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    httpAuth = creds.authorize(httplib2.Http()) # Авторизуемся в системе
+async def create_table(title, user_email): # Авторизуемся в системе
     
     service =  apiclient.discovery.build('sheets', 'v4', http = httpAuth) # Выбираем работу с таблицами и 4 версию API 
 
@@ -59,7 +54,7 @@ async def create_table(title):
 
     access = driveService.permissions().create(
         fileId = spreadsheetId,
-        body = {'type': 'user', 'role': 'writer', 'emailAddress': 'ocirovvadim51@gmail.com'},  # Открываем доступ на редактирование
+        body = {'type': 'user', 'role': 'writer', 'emailAddress': f'{user_email}'},  # Открываем доступ на редактирование
         fields = 'id',
         sendNotificationEmail=False
     ).execute()
@@ -70,10 +65,6 @@ async def create_table(title):
 
 
 async def find_last_row(title):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    client = gspread.authorize(creds)
 
     sheet = client.open(title).sheet1
 
@@ -94,10 +85,6 @@ async def find_last_row(title):
 
 
 async def delete_data_sheet(title, last_filled_row_index):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    client = gspread.authorize(creds)
 
     sheet = client.open(title).sheet1
 
@@ -123,11 +110,6 @@ async def delete_data_sheet(title, last_filled_row_index):
 
 
 async def get_values(title, last_filled_row_index):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    client = gspread.authorize(creds)
-
     sheet = client.open(title).sheet1
 
     values_list = []
@@ -143,11 +125,6 @@ async def get_values(title, last_filled_row_index):
 
 
 async def get_title_worksheet(title):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-
-    client = gspread.authorize(creds)
-
     sheet = client.open(title)
     worksheets = sheet.worksheets()
 

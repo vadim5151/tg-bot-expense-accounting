@@ -65,11 +65,16 @@ btn_konstruktor = InlineKeyboardMarkup(inline_keyboard=[
 async def catalog(all_category):
     keyboard = InlineKeyboardBuilder()
 
+    
     for category in all_category:
         keyboard.add(InlineKeyboardButton(text=category, callback_data=f'opt_{category}'))
 
     return keyboard.adjust(1).as_markup()
 
+
+btn_delete_email=InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Удалить почту', callback_data='delete_email')]
+])
 
 # async def get_all_category(all_category):
 #     keyboard = InlineKeyboardBuilder()
